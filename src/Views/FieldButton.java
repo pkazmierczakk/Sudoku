@@ -4,10 +4,12 @@ import Models.Coordinate;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 
 public class FieldButton extends JButton {
     private Coordinate coord;
     private FriendlyRepresentField field;
+    private ActionListener actionListener;
 
     FieldButton(Coordinate coord) {
         super();
@@ -34,6 +36,15 @@ public class FieldButton extends JButton {
         if (field.isEditable()) {
             setBorder(BorderFactory.createEmptyBorder());
         }
+    }
+
+    public void setActionListener(ActionListener actionListener) {
+        this.actionListener = actionListener;
+        super.addActionListener(actionListener);
+    }
+
+    public void removeActionListener() {
+        removeActionListener(this.actionListener);
     }
 
     public void setText(int value) {

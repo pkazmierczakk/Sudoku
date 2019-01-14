@@ -2,7 +2,11 @@ package Views;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.EventListener;
+import java.util.HashSet;
+import java.util.Set;
 
 import Controllers.SudokuController;
 import Exceptions.UnableToRedoMoveException;
@@ -15,7 +19,7 @@ public class SudokuView extends JComponent {
     private final String[] REGION_COLORS = new String[]{"#d4aa7d", "#efd09e", "#d2d8b3", "#90a9b7", "#c5d1eb", "#92afd7", "#5a7684", "#97c695", "#a6d9f7"};
     private SudokuController sudokuController;
     private FieldButton [][]fieldButtons;
-    private ArrayList<Coordinate> previousWrongFields = new ArrayList<>();
+    private Set<Coordinate> previousWrongFields = new HashSet<>();
 
     public SudokuView(SudokuController sudokuController) {
         fieldButtons = new FieldButton[9][9];
@@ -31,7 +35,7 @@ public class SudokuView extends JComponent {
         generateBoardView();
     }
     private void generateBoardView() {
-        FriendlyRepresentField[][] friendlyBoard = sudokuController.getBoard();
+        FriendlyRepresentField[][] friendlyBoard = sudokuController.getPlayerBoard();
         for (int coordY = 0; coordY < 9; coordY++) {
             for (int coordX = 0; coordX < 9; coordX++) {
                 FieldButton fieldButton = new FieldButton();
@@ -46,9 +50,10 @@ public class SudokuView extends JComponent {
                     if (field.getValue() > 0) {
                         fieldButton.setFont(new java.awt.Font("Tahoma", Font.BOLD, 24));
                     }
-                    fieldButton.addActionListener(evt -> {
-                        viewInputs(fblock, fieldButton);
-                    });
+                    fieldButton.setActionListener(new ClickBoardButtonListener(fblock, fieldButton));
+//                    fieldButton.addActionListener(evt -> {
+//                        viewInputs(fblock, fieldButton);
+//                    });
                 } else {
                     fieldButton.setText(field.getValue());
                 }
@@ -59,6 +64,19 @@ public class SudokuView extends JComponent {
 
                 fieldButtons[coordY][coordX] = fieldButton;
             }
+        }
+    }
+
+    class ClickBoardButtonListener implements ActionListener {
+        private JPanel fblock;
+        private FieldButton btn;
+        ClickBoardButtonListener(JPanel fblock, FieldButton btn) {
+            this.fblock = fblock;
+            this.btn = btn;
+        }
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            viewInputs(fblock, btn);
         }
     }
 
@@ -94,9 +112,9 @@ public class SudokuView extends JComponent {
 
     public boolean checkSolution() {
         clearWrongFields();
-        ArrayList<Coordinate> wrongFieldsCoords = sudokuController.checkSolution();
+        Set<Coordinate> wrongFieldsCoords = sudokuController.checkSolution();
         if (wrongFieldsCoords.isEmpty()) {
-            wrongFieldsCoords = sudokuController.getEmptyFields();
+            wrongFieldsCoords = new HashSet<>(sudokuController.getEmptyFields());
         }
         if (wrongFieldsCoords.size() > 0) {
             for (Coordinate coord : wrongFieldsCoords) {
@@ -109,11 +127,22 @@ public class SudokuView extends JComponent {
     }
 
     public void undoMove() throws UnableToUndoMoveException {
-            PlayerMove playerMove = sudokuController.getUndoMove();
-            fieldButtons[playerMove.getCoords().getCoordY()][playerMove.getCoords().getCoordX()].setText(playerMove.getPrevValue());
+        PlayerMove playerMove = sudokuController.getUndoMove();
+        fieldButtons[playerMove.getCoords().getCoordY()][playerMove.getCoords().getCoordX()].setText(playerMove.getPrevValue());
     }
     public void redoMove() throws UnableToRedoMoveException {
-            PlayerMove playerMove = sudokuController.getRedoMove();
-            fieldButtons[playerMove.getCoords().getCoordY()][playerMove.getCoords().getCoordX()].setText(playerMove.getPrevValue());
+        PlayerMove playerMove = sudokuController.getRedoMove();
+        fieldButtons[playerMove.getCoords().getCoordY()][playerMove.getCoords().getCoordX()].setText(playerMove.getPrevValue());
+    }
+    public void showSolution() {
+        int sizeBoard = 9;
+        int [][]validValues = sudokuController.getSolvedBoard();
+        for (int y = 0; y < sizeBoard; y++) {
+            for (int x = 0; x < sizeBoard; x++) {
+                fieldButtons[y][x].setText(validValues[y][x]);
+                fieldButtons[y][x].removeActionListener();
+                fieldButtons[y][x].setFont(new java.awt.Font("Tahoma", Font.PLAIN, 24));
+            }
+        }
     }
 }

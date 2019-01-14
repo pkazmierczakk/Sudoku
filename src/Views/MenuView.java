@@ -13,6 +13,7 @@ public class MenuView extends JComponent {
     private JButton undoMoveBtn = new JButton(("Undo move"));
     private JButton redoMoveBtn = new JButton("Redo move");
     private JButton checkSolutionBtn = new JButton("Check solution");
+    private JButton showSolutionBtn = new JButton("Show solution");
     private JButton helpBtn = new JButton("Help");
     private JButton saveGameBtn = new JButton("Save game");
     private JButton loadGameBtn = new JButton("Load game");
@@ -20,15 +21,25 @@ public class MenuView extends JComponent {
 
     public MenuView(SudokuGUI sudokuGUI, SudokuView boardView) {
         this.boardView = boardView;
-        setLayout(new GridLayout(2,3,5, 5));
+        setLayout(new GridLayout(2,4,5, 5));
         add(helpBtn);
         add(saveGameBtn);
         add(loadGameBtn);
         add(checkSolutionBtn);
         add(undoMoveBtn);
         add(redoMoveBtn);
+        add(showSolutionBtn);
 
+        showSolutionBtn.addActionListener(evt -> {
+            boardView.showSolution();
+            saveGameBtn.setEnabled(false);
+            loadGameBtn.setEnabled(false);
+            checkSolutionBtn.setEnabled(false);
+            undoMoveBtn.setEnabled(false);
+            redoMoveBtn.setEnabled(false);
+            showSolutionBtn.setEnabled(false);
 
+        });
         checkSolutionBtn.addActionListener(evt -> {
             if (boardView.checkSolution()) {
                 JOptionPane.showMessageDialog(boardView, "You won the game!", "Information", JOptionPane.INFORMATION_MESSAGE);
@@ -83,7 +94,9 @@ public class MenuView extends JComponent {
 
             String s = (String)JOptionPane.showInputDialog(boardView, "Choose game save", "Save game", JOptionPane.QUESTION_MESSAGE, null, possibilities, possibilities[0]);
             if (s != null && !s.isEmpty()) {
-                s = s.substring(0, s.length() - postfix_saved_game.length());
+                if (s.length() > PREFIX_SAVE_NAME.length()+2) {
+                    s = s.substring(0, s.length() - postfix_saved_game.length());
+                }
 
                 if (sudokuGUI.saveGame(s)) {
                     JOptionPane.showMessageDialog(boardView, "Game saved successfully!");

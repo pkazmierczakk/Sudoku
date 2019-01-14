@@ -9,8 +9,7 @@ import Models.PlayerMove;
 import Views.FriendlyRepresentField;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 
 
 public class SudokuController implements Serializable {
@@ -18,7 +17,8 @@ public class SudokuController implements Serializable {
         generateBoard();
     }
 
-    private Board board = new Board();
+    private Board playerBoard = new Board();
+    private Board solvedBoard = new Board();
     private ArrayList<PlayerMove> movesOfPlayer = new ArrayList<>();
     private int currentMoveIndex = 0;
 
@@ -94,12 +94,12 @@ public class SudokuController implements Serializable {
         return wrongFieldsCoords;
     }
 
-    public void setBoard(Field[][]board) {
-        this.board.setBoard(board);
+    public void setPlayerBoard(Field[][] playerBoard) {
+        this.playerBoard.setBoard(playerBoard);
     }
 
     public Field[][] getRawBoard() {
-        return this.board.getBoard();
+        return this.playerBoard.getBoard();
     }
 
     public void setField(Coordinate coord, int val, boolean saveHistory) {
@@ -114,32 +114,28 @@ public class SudokuController implements Serializable {
             movesOfPlayer.add(new PlayerMove(coord, val));
         }
 
-        board.setFieldVal(coord.getCoordX(), coord.getCoordY(), val);
+        playerBoard.setFieldVal(coord.getCoordX(), coord.getCoordY(), val);
     }
 
     public int getFieldValue(Coordinate coords) {
-        return this.board.getFieldValue(coords.getCoordX(), coords.getCoordY()); // TODO Change structure of it
+        return this.playerBoard.getFieldValue(coords.getCoordX(), coords.getCoordY()); // TODO Change structure of it
     }
 
     public Region[] getRegions() {
-        return board.getRegions();
+        return playerBoard.getRegions();
     }
 
     public void setRegions(Region[] regions) {
-        this.board.setRegions(regions);
+        this.playerBoard.setRegions(regions);
     }
 
-    public ArrayList<Coordinate> checkSolution() {
-        ArrayList<Coordinate> wrongFieldsCoords = checkRegions();
+    public Set<Coordinate> checkSolution() {
+        Set<Coordinate> wrongFieldsCoords = new HashSet<>(checkRegions());
         wrongFieldsCoords.addAll(checkHorizontallyAndVertically());
         return wrongFieldsCoords;
     }
 
     public PlayerMove getUndoMove() throws UnableToUndoMoveException {
-//        for (PlayerMove p : movesOfPlayer) {
-//            System.out.print(p.getPrevValue() + " ");
-//        }
-//        System.out.println();
         if (this.currentMoveIndex < 1) {
             throw new UnableToUndoMoveException();
         }
@@ -168,44 +164,6 @@ public class SudokuController implements Serializable {
     }
 
     private void generateBoard() {
-        int amountOfNumbers = 27;
-        Field[][] board = new Field[9][9];
-        for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 9; j++) {
-                board[i][j] = new Field();
-            }
-        }
-        setBoard(board);
-
-//        Field[][]board = {
-//                {new Field(0), new Field(2), new Field(0), new Field(9), new Field(0), new Field(0), new Field(0), new Field(5), new Field(0)},
-//                {new Field(5), new Field(0), new Field(0), new Field(0), new Field(0), new Field(4), new Field(0), new Field(0), new Field(8)},
-//                {new Field(0), new Field(0), new Field(6), new Field(0), new Field(0), new Field(0), new Field(0), new Field(0), new Field(0)},
-//
-//                {new Field(0), new Field(5), new Field(0), new Field(0), new Field(3), new Field(0), new Field(7), new Field(0), new Field(0)},
-//                {new Field(9), new Field(0), new Field(0), new Field(1), new Field(0), new Field(6), new Field(0), new Field(0), new Field(3)},
-//                {new Field(0), new Field(0), new Field(2), new Field(0), new Field(8), new Field(0), new Field(0), new Field(4), new Field(0)},
-//
-//                {new Field(0), new Field(0), new Field(0), new Field(0), new Field(0), new Field(0), new Field(4), new Field(0), new Field(0)},
-//                {new Field(3), new Field(0), new Field(0), new Field(7), new Field(0), new Field(0), new Field(0), new Field(0), new Field(9)},
-//                {new Field(0), new Field(7), new Field(0), new Field(0), new Field(0), new Field(8), new Field(0), new Field(2), new Field(0)},
-//        };
-
-//        Field[][]board = {
-//                //new Field(5),new Field(3),new Field(4)
-//                {new Field(0),new Field(0),new Field(0),new Field(6),new Field(7),new Field(8),new Field(9),new Field(1),new Field(2)},
-//                {new Field(6),new Field(7),new Field(2),new Field(1),new Field(9),new Field(5),new Field(3),new Field(4),new Field(8)},
-//                {new Field(1),new Field(9),new Field(8),new Field(3),new Field(4),new Field(2),new Field(5),new Field(6),new Field(7)},
-//
-//                {new Field(8),new Field(5),new Field(9),new Field(7),new Field(6),new Field(1),new Field(4),new Field(2),new Field(3)},
-//                {new Field(4),new Field(2),new Field(6),new Field(8),new Field(5),new Field(3),new Field(7),new Field(9),new Field(1)},
-//                {new Field(7),new Field(1),new Field(3),new Field(9),new Field(2),new Field(4),new Field(8),new Field(5),new Field(6)},
-//
-//                {new Field(9),new Field(6),new Field(1),new Field(5),new Field(3),new Field(7),new Field(2),new Field(8),new Field(4)},
-//                {new Field(2),new Field(8),new Field(7),new Field(4),new Field(1),new Field(9),new Field(6),new Field(3),new Field(5)},
-//                {new Field(3),new Field(4),new Field(5),new Field(2),new Field(8),new Field(6),new Field(1),new Field(7),new Field(9)},
-//        };
-//        setBoard(board);
 
         Region[] regions = new Region[] {
                 new Region(0, new Coordinate[] {new Coordinate(0,0), new Coordinate(1,0), new Coordinate(0,1), new Coordinate(1,1), new Coordinate(2,1), new Coordinate(0,2), new Coordinate(2,2), new Coordinate(3,2), new Coordinate(2,3)}),
@@ -218,51 +176,100 @@ public class SudokuController implements Serializable {
                 new Region(7, new Coordinate[] {new Coordinate(3,6), new Coordinate(4,6), new Coordinate(2,7), new Coordinate(3,7), new Coordinate(4,7), new Coordinate(5,7), new Coordinate(3,8), new Coordinate(4,8), new Coordinate(5,8)}),
                 new Region(8, new Coordinate[] {new Coordinate(8,4), new Coordinate(8,5), new Coordinate(6,6), new Coordinate(8,6), new Coordinate(6,7), new Coordinate(8,7), new Coordinate(6,8), new Coordinate(7,8), new Coordinate(8,8)}),
         };
+        playerBoard.setRegions(regions);
+        solvedBoard.setRegions(regions);
 
-//        Region[] regions = new Region[] {
-//                new Region(0, new Coordinate[] {new Coordinate(0,0), new Coordinate(1,0), new Coordinate(2,0), new Coordinate(0,1), new Coordinate(1,1), new Coordinate(2,1), new Coordinate(0,2), new Coordinate(1,2), new Coordinate(2,2)}),
-//                new Region(1, new Coordinate[] {new Coordinate(3,0), new Coordinate(4,0), new Coordinate(5,0), new Coordinate(3,1), new Coordinate(4,1), new Coordinate(5,1), new Coordinate(3,2), new Coordinate(4,2), new Coordinate(5,2)}),
-//                new Region(2, new Coordinate[] {new Coordinate(6,0), new Coordinate(7,0), new Coordinate(8,0), new Coordinate(6,1), new Coordinate(7,1), new Coordinate(8,1), new Coordinate(6,2), new Coordinate(7,2), new Coordinate(8,2)}),
-//
-//                new Region(3, new Coordinate[] {new Coordinate(0,3), new Coordinate(1,3), new Coordinate(2,3), new Coordinate(0,4), new Coordinate(1,4), new Coordinate(2,4), new Coordinate(0,5), new Coordinate(1,5), new Coordinate(2,5)}),
-//                new Region(4, new Coordinate[] {new Coordinate(3,3), new Coordinate(4,3), new Coordinate(5,3), new Coordinate(3,4), new Coordinate(4,4), new Coordinate(5,4), new Coordinate(3,5), new Coordinate(4,5), new Coordinate(5,5)}),
-//                new Region(5, new Coordinate[] {new Coordinate(6,3), new Coordinate(7,3), new Coordinate(8,3), new Coordinate(6,4), new Coordinate(7,4), new Coordinate(8,4), new Coordinate(6,5), new Coordinate(7,5), new Coordinate(8,5)}),
-//
-//                new Region(6, new Coordinate[] {new Coordinate(0,6), new Coordinate(1,6), new Coordinate(2,6), new Coordinate(0,7), new Coordinate(1,7), new Coordinate(2,7), new Coordinate(0,8), new Coordinate(1,8), new Coordinate(2,8)}),
-//                new Region(7, new Coordinate[] {new Coordinate(3,6), new Coordinate(4,6), new Coordinate(5,6), new Coordinate(3,7), new Coordinate(4,7), new Coordinate(5,7), new Coordinate(3,8), new Coordinate(4,8), new Coordinate(5,8)}),
-//                new Region(8, new Coordinate[] {new Coordinate(6,6), new Coordinate(7,6), new Coordinate(8,6), new Coordinate(6,7), new Coordinate(7,7), new Coordinate(8,7), new Coordinate(6,8), new Coordinate(7,8), new Coordinate(8,8)}),
-//        };
-
-        setRegions(regions);
-
-        Random random = new Random();
-        ArrayList<Coordinate> coords = new ArrayList<>(amountOfNumbers);
-        // Rand coordinates
-        for (int i = 0; i < amountOfNumbers; i++) {
-            int x = random.nextInt(9);
-            int y =  random.nextInt(9);
-            Coordinate newCoord = new Coordinate(x,y);
-            if (coords.indexOf(newCoord) == -1) {
-                coords.add(newCoord);
-            } else {
-                i -= 1;
+        solvedBoard.setBoard(createFilledBoard());
+        playerBoard.setBoard(getEmptyRawBoard());
+        int numbersOfFieldFilledInEachRegion = 3;
+        for (Region region : regions) {
+            for (int i = 0; i < numbersOfFieldFilledInEachRegion; i++) {
+                Coordinate coord = getRandomCoordinateFrom(region);
+                if (playerBoard.getFieldValue(coord.getCoordX(), coord.getCoordY()) == 0) {
+                    int value = solvedBoard.getFieldValue(coord.getCoordX(), coord.getCoordY());
+                    playerBoard.setFieldVal(coord.getCoordX(), coord.getCoordY(), value, false);
+                } else {
+                    i--;
+                }
             }
-        }
-        // set randed coordinates as uneditable fields by player
-        for (Coordinate coord : coords) {
-            board[coord.getCoordY()][coord.getCoordX()].setEditable(false);
-        }
-
-        // Set random values until all are correct
-        while(!coords.isEmpty()) {
-            for (Coordinate coord : coords) {
-                this.board.setFieldVal(coord.getCoordX(), coord.getCoordY(), random.nextInt(9)+1);
-            }
-            coords = checkSolution();
         }
     }
+    private Coordinate getRandomCoordinateFrom(Region region) {
+        Random random = new Random();
+        int index = random.nextInt(region.getCoords().length);
+        return region.getCoords()[index];
+    }
+    private Field[][] getEmptyRawBoard() {
+        Field[][]rawBoard = new Field[9][9];
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                rawBoard[i][j] = new Field();
+            }
+        }
+        return rawBoard;
+    }
+    private Field[][] createFilledBoard(){
 
-    public FriendlyRepresentField[][] getBoard() {
+        Region[] regions = playerBoard.getRegions();
+        Field[][] rawBoard = null;
+
+        boolean isBoardFilledCorrectly = false;
+        while (!isBoardFilledCorrectly) {
+            isBoardFilledCorrectly = true;
+            rawBoard = getEmptyRawBoard();
+            for (int i = 0; i < 9; i++) {
+                if (!fillRegion(rawBoard, regions[i])) {
+                    isBoardFilledCorrectly = false;
+                    break;
+                }
+            }
+        }
+
+        return rawBoard;
+
+    }
+
+    private boolean fillRegion(Field [][] rawBoard, Region region) {
+        ArrayList<Integer> availableValues = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9));
+        Random random = new Random();
+
+        for (Coordinate coord : region.getCoords()) {
+            ArrayList<Integer> valuesThatCanBeInserted = new ArrayList<>();
+            for (int number : availableValues) {
+                if (canInsertValue(rawBoard, coord, number)) {
+                    valuesThatCanBeInserted.add(number);
+                }
+            }
+            if (valuesThatCanBeInserted.size() == 0) {
+                return false;
+            }
+
+            int drawnValue = valuesThatCanBeInserted.get(random.nextInt(valuesThatCanBeInserted.size()));
+            rawBoard[coord.getCoordY()][coord.getCoordX()].setValue(drawnValue);
+            availableValues.remove((Integer)drawnValue);
+        }
+
+        return true;
+
+    }
+
+    private boolean canInsertValue(Field [][] rawBoard, Coordinate coord, int val) {
+        int sizeBoard = 9;
+
+        for (int i = 0; i < sizeBoard; i++) {
+            if (rawBoard[coord.getCoordY()][i].getValue() == val && coord.getCoordX() != i) {
+                return false;
+            }
+
+            if (rawBoard[i][coord.getCoordX()].getValue() == val && coord.getCoordY() != i) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public FriendlyRepresentField[][] getPlayerBoard() {
         FriendlyRepresentField [][] friendlyBoard = new FriendlyRepresentField[9][9];
         Region []regions = getRegions();
         Field [][] rawBoard = getRawBoard();
@@ -276,5 +283,18 @@ public class SudokuController implements Serializable {
             }
         }
         return friendlyBoard;
+    }
+
+    public int[][] getSolvedBoard() {
+        int[][] values = new int[9][9];
+
+        Field[][] board = solvedBoard.getBoard();
+
+        for (int y = 0; y < 9; y++) {
+            for (int x = 0; x < 9; x++) {
+                values[y][x] = board[y][x].getValue();
+            }
+        }
+        return values;
     }
 }

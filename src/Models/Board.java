@@ -21,6 +21,11 @@ public class Board  implements Serializable {
         board[coordY][coordX].setValue(val);
     }
 
+    public void setFieldVal(int coordX, int coordY, int val, boolean isEditable) {
+        board[coordY][coordX].setValue(val);
+        board[coordY][coordX].setEditable(isEditable);
+    }
+
     public int getFieldValue(int coordX, int coordY) { return board[coordY][coordX].getValue(); }
 
     public Region[] getRegions() {

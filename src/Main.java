@@ -1,5 +1,8 @@
 import Views.SudokuGUI;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Main {
     /**
      * @param args the command line arguments
